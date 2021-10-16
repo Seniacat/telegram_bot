@@ -10,7 +10,9 @@ load_dotenv()
 
 PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-CHAT_ID = os.getenv('CHAT_ID')
+TELEGRAM_CHAT_ID = os.getenv('CHAT_ID')
+
+headers = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
 
 ENV = {
     'PRACTICUM_TOKEN': PRACTICUM_TOKEN,
@@ -57,16 +59,19 @@ class KeyNotFound(Exception):
 class StatusError(Exception):
     """Исключение, вызываемое при недокументированном статусе работы."""
 
+    def __init__(self, status):
+        """Инициализатор."""
+        self.status = status
+
     def __str__(self):
         """Вывод сообщения об ошибке."""
-        return "Недокументированный статус домашней работы"
+        return f'Недокументированный статус домашней работы: {self.status}'
 
 
 def send_message(bot, message):
     """Функция отправки сообщений об изменении статуса в мессенджер."""
-    chat_id = CHAT_ID
     try:
-        bot.send_message(chat_id, message)
+        bot.send_message(TELEGRAM_CHAT_ID, message)
         logging.info(f'Бот отправил сообщение "{message}"')
     except Exception:
         logging.error(
@@ -77,10 +82,12 @@ def send_message(bot, message):
 
 def get_api_answer(url, current_timestamp):
     """Функция отправки запросов к API."""
-    headers = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
     payload = {'from_date': current_timestamp}
-    homework_statuses = requests.get(url, headers=headers, params=payload)
-    if homework_statuses.status_code != 200:
+    try:
+        homework_statuses = requests.get(url, headers=headers, params=payload)
+        if homework_statuses.status_code != 200:
+            raise StatusCodeNot200(homework_statuses)
+    except Exception:
         raise StatusCodeNot200(homework_statuses)
     return homework_statuses.json()
 
@@ -91,7 +98,7 @@ def parse_status(homework):
     try:
         verdict = HOMEWORK_STATUSES[status]
     except KeyError:
-        raise StatusError
+        raise StatusError(status)
     homework_name = homework.get('homework_name')
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
@@ -109,7 +116,7 @@ def check_response(response):
 def update_timestamp(response):
     """Функция обновления временной метки, отправляемой в запросе к API."""
     try:
-        current_date = response['current_date']
+        current_date = int(response['current_date'])
     except KeyError:
         raise KeyNotFound
     return current_date
