@@ -1,2 +1,2 @@
-# homework_bot
-python telegram bot
+# Telegram bot
+python telegram bot for checking homework statuses
