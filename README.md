@@ -36,11 +36,11 @@ python3 -m pip install --upgrade pip
 ```
 pip install -r requirements.txt
 ```
-В основной директории добавьте файл .env, в котором укажите свои ключи для Praktikuma и Telegramma.
+В основной директории добавьте файл .env, в котором укажите свои ключи для Praktikum и Telegram.
 
-PRAKTIKUM_TOKEN =
-TELEGRAM_TOKEN =
-TELEGRAM_CHAT_ID =
+- PRAKTIKUM_TOKEN =
+- TELEGRAM_TOKEN =
+- TELEGRAM_CHAT_ID =
 Запустить проект:
 ```
 python3 manage.py runserver
