@@ -41,7 +41,4 @@ pip install -r requirements.txt
 - PRAKTIKUM_TOKEN =
 - TELEGRAM_TOKEN =
 - TELEGRAM_CHAT_ID =
-Запустить проект:
-```
-python3 manage.py runserver
-```
+
